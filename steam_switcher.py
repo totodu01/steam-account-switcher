@@ -465,7 +465,9 @@ def _write_localconfig_vdf(steamid64: str):
 
 # ─── Extra account data (persisted next to the script) ───────────────────────
 
-_EXTRA_PATH = Path(__file__).parent / "accounts_extra.json"
+# When frozen by PyInstaller, write user data next to the .exe, not inside _MEIPASS
+_APP_DIR    = Path(sys.executable).parent if getattr(sys, "frozen", False) else Path(__file__).parent
+_EXTRA_PATH = _APP_DIR / "accounts_extra.json"
 
 
 def _load_extra() -> dict:
@@ -618,9 +620,15 @@ def clear_steam():
 
 # ─── App icon ─────────────────────────────────────────────────────────────────
 
+def _resource(relative: str) -> Path:
+    """Resolve a bundled resource path for both normal and PyInstaller runs."""
+    base = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
+    return base / relative
+
+
 def _build_icon() -> Optional[QIcon]:
     """Load rsc/ico.ico, center-crop to square, populate all standard sizes."""
-    path = Path(__file__).parent / "rsc" / "ico.ico"
+    path = _resource("rsc/ico.ico")
     if not path.exists():
         return None
     src = QPixmap(str(path))
