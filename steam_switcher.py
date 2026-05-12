@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-"""Steam Account Switcher — Professional UI"""
 
 from __future__ import annotations
 
@@ -27,7 +26,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QSize, QRect, QPoint
 from PyQt6.QtGui import (
-    QPixmap, QFont, QColor, QPainter, QPainterPath,
+    QPixmap, QIcon, QFont, QColor, QPainter, QPainterPath,
     QBrush, QPen, QCursor, QLinearGradient,
 )
 
@@ -982,6 +981,10 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(500, 400)
         self.resize(500, 580)
 
+        _ico = Path(__file__).parent / "rsc" / "ico.ico"
+        if _ico.exists():
+            self.setWindowIcon(QIcon(str(_ico)))
+
         try:
             self._steam = get_steam_path()
         except Exception:
@@ -1247,6 +1250,11 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setApplicationName("Steam Account Switcher")
     app.setFont(QFont("Segoe UI", 10))
+
+    _ico_path = Path(__file__).parent / "rsc" / "ico.ico"
+    if _ico_path.exists():
+        app.setWindowIcon(QIcon(str(_ico_path)))
+
     win = MainWindow()
     win.show()
     sys.exit(app.exec())
