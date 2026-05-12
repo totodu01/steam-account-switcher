@@ -616,6 +616,30 @@ def clear_steam():
         shutil.rmtree(local, ignore_errors=True)
 
 
+# ─── App icon ─────────────────────────────────────────────────────────────────
+
+def _build_icon() -> Optional[QIcon]:
+    """Load rsc/ico.ico, center-crop to square, populate all standard sizes."""
+    path = Path(__file__).parent / "rsc" / "ico.ico"
+    if not path.exists():
+        return None
+    src = QPixmap(str(path))
+    if src.isNull():
+        return None
+    # Center-crop to square so nothing gets stretched or cut
+    w, h = src.width(), src.height()
+    side = min(w, h)
+    src = src.copy((w - side) // 2, (h - side) // 2, side, side)
+    icon = QIcon()
+    for sz in (16, 24, 32, 48, 64, 128, 256):
+        icon.addPixmap(
+            src.scaled(sz, sz,
+                       Qt.AspectRatioMode.KeepAspectRatio,
+                       Qt.TransformationMode.SmoothTransformation)
+        )
+    return icon
+
+
 # ─── Shared stylesheet helpers ────────────────────────────────────────────────
 
 def _btn(bg: str, hover: str, color: str = "white",
@@ -981,9 +1005,9 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(500, 400)
         self.resize(500, 580)
 
-        _ico = Path(__file__).parent / "rsc" / "ico.ico"
-        if _ico.exists():
-            self.setWindowIcon(QIcon(str(_ico)))
+        _icon = _build_icon()
+        if _icon:
+            self.setWindowIcon(_icon)
 
         try:
             self._steam = get_steam_path()
@@ -1251,9 +1275,9 @@ if __name__ == "__main__":
     app.setApplicationName("Steam Account Switcher")
     app.setFont(QFont("Segoe UI", 10))
 
-    _ico_path = Path(__file__).parent / "rsc" / "ico.ico"
-    if _ico_path.exists():
-        app.setWindowIcon(QIcon(str(_ico_path)))
+    _icon = _build_icon()
+    if _icon:
+        app.setWindowIcon(_icon)
 
     win = MainWindow()
     win.show()
